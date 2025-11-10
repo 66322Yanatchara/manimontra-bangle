@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>manimontra — Customer Vault (v2.1)</title>
+  <title>manimontra — Customer Vault (Firestore v1)</title>
   <style>
     :root{
       --bg:#fafafa; --text:#0f172a; --muted:#6b7280; --panel:#ffffff; --border:#e5e7eb; --chip:#f1f5f9;
@@ -41,7 +41,6 @@
     input:focus, textarea:focus{ border-color:#f0abfc; box-shadow:0 0 0 3px rgba(240,171,252,.25) }
     textarea{ min-height:84px; resize:vertical }
 
-    /* Single-column controls: phone (full row), then date under it */
     .row-2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px }
     @media (max-width:680px){ .row-2{ grid-template-columns:1fr } }
 
@@ -77,8 +76,11 @@
 <body>
   <header>
     <div class="wrap">
-      <div class="brand"><div class="logo">manimontra</div><span class="chip">Customer Vault — LocalStorage</span></div>
-      <div class="tagline">เก็บชื่อ–ที่อยู่–เบอร์โทร–วันที่ ค้นหา/เรียง/แก้ไข/ลบ/พิมพ์</div>
+      <div class="brand">
+        <div class="logo">manimontra</div>
+        <span class="chip">Customer Vault — <b>Firestore</b> Realtime</span>
+      </div>
+      <div class="tagline">เก็บชื่อ–ที่อยู่–เบอร์โทร–วันที่ ค้นหา/เรียง/แก้ไข/ลบ/พิมพ์ (แชร์ข้อมูลร่วมกัน)</div>
       <div class="stats">
         <div class="stat"><div class="k" id="statTotal">0</div><div class="t">ลูกค้าทั้งหมด</div></div>
         <div class="stat"><div class="k" id="statToday">0</div><div class="t">เพิ่มวันนี้</div></div>
@@ -123,8 +125,8 @@
             <span class="chip" id="countChip">0 รายการ</span>
           </div>
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
-            <button class="btn warn" id="printBtn">พิมพ์</button>
-            <button class="btn danger" id="clearBtn">ล้างฐานข้อมูล</button>
+            <button class="btn warn" id="printBtn" type="button">พิมพ์</button>
+            <button class="btn danger" id="clearBtn" type="button">ล้างฐานข้อมูล</button>
           </div>
         </div>
         <div class="table-wrap">
@@ -142,43 +144,74 @@
             <tbody id="tbody"></tbody>
           </table>
         </div>
-        <div class="wrap" style="padding:10px 16px 16px; color:var(--muted); font-size:12px">เก็บข้อมูลในเครื่องนี้ด้วย LocalStorage (เหมาะกับใช้งานส่วนตัว/ทดสอบ) — ต้องการเชื่อมต่อฐานข้อมูลจริง (เช่น MySQL) แจ้งได้เลย</div>
+        <div class="wrap" style="padding:10px 16px 16px; color:var(--muted); font-size:12px">
+          ข้อมูลถูกเก็บใน Cloud Firestore (แชร์ระหว่างผู้ใช้ทุกคนที่มีลิงก์)
+        </div>
       </div>
     </div>
   </section>
 
   <div id="toast"></div>
 
-  <script>
-    const DB_KEY = 'mm_customer_v21';
-    const load = () => { try{ return JSON.parse(localStorage.getItem(DB_KEY))||[] }catch{ return [] } };
-    const save = (rows) => localStorage.setItem(DB_KEY, JSON.stringify(rows));
+  <!-- ===== Firebase + Firestore (CDN) ===== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-analytics.js";
+    import {
+      getFirestore, collection, doc, addDoc, setDoc, deleteDoc, getDoc,
+      onSnapshot, query, orderBy, serverTimestamp, getDocs
+    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
+    // ---- Your Firebase config (จาก Console) ----
+    const firebaseConfig = {
+      apiKey: "AIzaSyB90Xv0vw6rvVChpycbl5iPPf987ZBbQmM",
+      authDomain: "manimontra-bangle.firebaseapp.com",
+      projectId: "manimontra-bangle",
+      storageBucket: "manimontra-bangle.appspot.com",
+      messagingSenderId: "21862405986",
+      appId: "1:21862405986:web:d4c878b0a91c067b15fe3b",
+      measurementId: "G-BBHP6Y675C"
+    };
+
+    // ---- Init ----
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch(_) {}
+    const db = getFirestore(app);
+
+    // (แนะนำ) เปิด Anonymous Auth ถ้าคุณตั้ง Rules ให้ต้อง auth
+    try { await signInAnonymously(getAuth()); } catch(e){ console.log('Anonymous auth skipped', e?.message); }
+
+    // ---- Helpers / UI ----
     const $ = s => document.querySelector(s);
     const $$ = s => Array.from(document.querySelectorAll(s));
-    const uid = () => crypto.randomUUID ? crypto.randomUUID() : 'id_'+Date.now()+Math.random().toString(16).slice(2);
-    const today = () => new Date().toISOString().slice(0,10);
-    const fmtDate = d => !d?'' : new Date(d).toLocaleDateString('th-TH');
     const cleanPhone = p => (p||'').replace(/[^0-9]/g,'');
-    const fmtPhone = p => { const d = cleanPhone(p); return d.length===10 ? `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}` : p };
-    const debounce = (fn,ms=250)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); } };
+    const fmtPhone = p => { const d = cleanPhone(p); return d.length===10 ? `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}` : p||'' };
+    const todayISO = () => new Date().toISOString().slice(0,10);
+    const fmtDate = d => !d?'' : new Date(d).toLocaleDateString('th-TH');
     const toast = (msg)=>{ const el=$('#toast'); el.textContent=msg; el.style.display='block'; clearTimeout(toast.t); toast.t=setTimeout(()=>el.style.display='none',2000); };
+    const uid = () => (crypto.randomUUID?.() ?? ('id_'+Date.now()+Math.random().toString(16).slice(2)));
 
-    let DB = load();
     let sortBy = 'date';
     let sortAsc = false;
+    let SNAP = [];      // snapshot cache (array of {id, ...data})
+
+    const customersRef = collection(db, 'customers');
+    const q = query(customersRef, orderBy('createdAt','desc'));
 
     function refreshStats(){
-      $('#statTotal').textContent = DB.length;
-      $('#statToday').textContent = DB.filter(r=>r.date===today()).length;
+      $('#statTotal').textContent = SNAP.length;
+      const t = new Date().toLocaleDateString('th-TH');
+      const c = SNAP.filter(r => r.date && new Date(r.date).toLocaleDateString('th-TH') === t).length;
+      $('#statToday').textContent = c;
     }
 
     function render(){
       refreshStats();
-      const q = $('#search').value.trim().toLowerCase();
-      const rows = DB.filter(r=>{
+      const qtext = $('#search').value.trim().toLowerCase();
+      const rows = SNAP.filter(r=>{
         const blob = `${r.name} ${r.phone} ${r.address} ${r.note}`.toLowerCase();
-        return blob.includes(q);
+        return blob.includes(qtext);
       }).sort((a,b)=>{
         const A = (a[sortBy]||'').toString().toLowerCase();
         const B = (b[sortBy]||'').toString().toLowerCase();
@@ -189,7 +222,11 @@
       ['name','phone','date'].forEach(k=>{ const el=$(`#s-${k}`); if(!el) return; el.textContent = sortBy===k ? (sortAsc?'▲':'▼') : '' });
 
       const tb = $('#tbody'); tb.innerHTML='';
-      if(rows.length===0){ const tr=document.createElement('tr'); tr.innerHTML=`<td colspan="6" class="muted" style="text-align:center; padding:30px">ยังไม่มีข้อมูล</td>`; tb.appendChild(tr); return; }
+      if(rows.length===0){
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td colspan="6" class="muted" style="text-align:center; padding:30px">ยังไม่มีข้อมูล</td>`;
+        tb.appendChild(tr); return;
+      }
 
       rows.forEach((r,i)=>{
         const tel = cleanPhone(r.phone);
@@ -198,7 +235,7 @@
         <td class="nowrap"><span class="idcell">${String(i+1).padStart(2,'0')}</span></td>
         <td>${r.name||'<span class=muted>-</span>'}</td>
         <td>${tel?`<a href="tel:${tel}">${fmtPhone(r.phone)}</a>`:(r.phone||'<span class=muted>-</span>')}</td>
-        <td>${r.address||'<span class=muted>-</span>'}</td>
+        <td>${(r.address||'').replaceAll('\n','<br>') || '<span class=muted>-</span>'}</td>
         <td class="nowrap">${fmtDate(r.date)||'<span class=muted>-</span>'}</td>
         <td>${r.note||'<span class=muted>-</span>'}
           <div class="nowrap" style="margin-top:6px">
@@ -213,36 +250,64 @@
 
     function fillForm(x){ $('#id').value=x?.id||''; $('#name').value=x?.name||''; $('#address').value=x?.address||''; $('#phone').value=fmtPhone(x?.phone||''); $('#date').value=x?.date||''; $('#note').value=x?.note||''; }
 
-    $('#phone').addEventListener('input', (e)=>{ const v=e.target.value; const nv=fmtPhone(v); e.target.value=nv; });
+    // ---- Realtime listener ----
+    onSnapshot(q, (snap) => {
+      SNAP = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      render();
+    });
+
+    // ---- Form events ----
+    $('#phone').addEventListener('input', (e)=>{ e.target.value = fmtPhone(e.target.value); });
     $('#resetBtn').onclick = ()=> fillForm({});
 
-    $('#form').addEventListener('submit', (e)=>{
+    $('#form').addEventListener('submit', async (e)=>{
       e.preventDefault();
       const row = {
         id: $('#id').value || uid(),
         name: $('#name').value.trim(),
         address: $('#address').value.trim(),
         phone: fmtPhone($('#phone').value.trim()),
-        date: $('#date').value || today(),
+        date: $('#date').value || todayISO(),
         note: $('#note').value.trim(),
+        updatedAt: serverTimestamp(),
       };
       if(!row.name || cleanPhone(row.phone).length!==10){ alert('กรุณากรอกชื่อ และ เบอร์โทร 10 หลัก'); return; }
-      const i = DB.findIndex(x=>x.id===row.id);
-      if(i>-1){ DB[i]=row; toast('อัปเดตข้อมูลแล้ว'); }
-      else { DB.push(row); toast('เพิ่มลูกค้าแล้ว'); }
-      save(DB); fillForm({}); render();
+
+      const existing = $('#id').value;
+      if(existing){
+        await setDoc(doc(customersRef, existing), row, { merge:true });
+        toast('อัปเดตข้อมูลแล้ว');
+      }else{
+        await addDoc(customersRef, { ...row, createdAt: serverTimestamp() });
+        toast('เพิ่มลูกค้าแล้ว');
+      }
+      fillForm({});
     });
 
+    // ---- Table actions ----
     $('#tbody').addEventListener('click', async (e)=>{
       const b = e.target.closest('button'); if(!b) return;
-      const id = b.dataset.id; const act = b.dataset.a; const row = DB.find(x=>x.id===id); if(!row) return;
-      if(act==='edit'){ fillForm(row); window.scrollTo({top:0, behavior:'smooth'}); }
-      if(act==='del'){ if(confirm('ลบรายการนี้?')){ DB = DB.filter(x=>x.id!==id); save(DB); render(); toast('ลบแล้ว'); } }
+      const id = b.dataset.id; const act = b.dataset.a; const row = SNAP.find(x=>x.id===id); if(!row) return;
+
+      if(act==='edit'){
+        // โหลดจาก Firestore อีกรอบเพื่อความชัวร์
+        const snap = await getDoc(doc(customersRef, id));
+        const data = { id, ...snap.data() };
+        fillForm(data);
+        window.scrollTo({top:0, behavior:'smooth'});
+      }
+      if(act==='del'){
+        if(confirm('ลบรายการนี้?')){ await deleteDoc(doc(customersRef, id)); toast('ลบแล้ว'); }
+      }
       if(act==='copy'){
-        try{ await navigator.clipboard.writeText(`${row.name}\n${row.address}\nโทร: ${fmtPhone(row.phone)}`); toast('คัดลอกที่อยู่แล้ว'); }catch{ toast('คัดลอกไม่สำเร็จ'); }
+        try{
+          await navigator.clipboard.writeText(`${row.name}\n${row.address}\nโทร: ${fmtPhone(row.phone)}`);
+          toast('คัดลอกที่อยู่แล้ว');
+        }catch{ toast('คัดลอกไม่สำเร็จ'); }
       }
     });
 
+    // ---- Sorting / Search / Print / Clear all ----
     $$('#table thead th[data-sort]').forEach(th=>{
       th.addEventListener('click',()=>{
         const k = th.dataset.sort; if(k==='#') return;
@@ -251,16 +316,16 @@
       });
     });
 
-    $('#search').addEventListener('input', debounce(render,250));
+    $('#search').addEventListener('input', (()=>{ let t; return (e)=>{ clearTimeout(t); t=setTimeout(render,250); }; })());
     $('#printBtn').onclick = () => window.print();
-    $('#clearBtn').onclick = () => { if(confirm('ล้างฐานข้อมูลทั้งหมด?')){ DB=[]; save(DB); render(); toast('ล้างฐานข้อมูลแล้ว'); } };
 
-    if(DB.length===0){ DB=[
-      {id:uid(), name:'คุณกนกพร ใจดี', phone:'081-234-5678', address:'99/9 ถ.สุขใจ ต.หนองสาหร่าย อ.เมือง จ.เชียงใหม่ 50000', date:today(), note:'ติดต่อจาก Facebook'},
-      {id:uid(), name:'คุณธนัท วัฒน์', phone:'089-876-5432', address:'10 หมู่ 2 ต.ท่าวังตาล อ.สารภี จ.เชียงใหม่ 50140', date:today(), note:'สนใจสินค้า A'}
-    ]; save(DB); }
-
-    render();
+    $('#clearBtn').onclick = async () => {
+      if(!confirm('ล้างฐานข้อมูลทั้งหมด?')) return;
+      const snap = await getDocs(customersRef);
+      const deletions = snap.docs.map(d => deleteDoc(d.ref));
+      await Promise.allSettled(deletions);
+      toast('ล้างฐานข้อมูลแล้ว');
+    };
   </script>
 </body>
 </html>
