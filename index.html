@@ -83,7 +83,6 @@
       <div class="tagline">เก็บชื่อ–ที่อยู่–เบอร์โทร–วันที่ ค้นหา/เรียง/แก้ไข/ลบ/พิมพ์ (แชร์ข้อมูลร่วมกัน)</div>
       <div class="stats">
         <div class="stat"><div class="k" id="statTotal">0</div><div class="t">ลูกค้าทั้งหมด</div></div>
-        <div class="stat"><div class="k" id="statToday">0</div><div class="t">เพิ่มวันนี้</div></div>
       </div>
     </div>
   </header>
@@ -163,7 +162,7 @@
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
-    // ---- Your Firebase config (จาก Console) ----
+    // ---- Your Firebase config ----
     const firebaseConfig = {
       apiKey: "AIzaSyB90Xv0vw6rvVChpycbl5iPPf987ZBbQmM",
       authDomain: "manimontra-bangle.firebaseapp.com",
@@ -178,8 +177,6 @@
     const app = initializeApp(firebaseConfig);
     try { getAnalytics(app); } catch(_) {}
     const db = getFirestore(app);
-
-    // (แนะนำ) เปิด Anonymous Auth ถ้าคุณตั้ง Rules ให้ต้อง auth
     try { await signInAnonymously(getAuth()); } catch(e){ console.log('Anonymous auth skipped', e?.message); }
 
     // ---- Helpers / UI ----
@@ -190,7 +187,6 @@
     const todayISO = () => new Date().toISOString().slice(0,10);
     const fmtDate = d => !d?'' : new Date(d).toLocaleDateString('th-TH');
     const toast = (msg)=>{ const el=$('#toast'); el.textContent=msg; el.style.display='block'; clearTimeout(toast.t); toast.t=setTimeout(()=>el.style.display='none',2000); };
-    const uid = () => (crypto.randomUUID?.() ?? ('id_'+Date.now()+Math.random().toString(16).slice(2)));
 
     let sortBy = 'date';
     let sortAsc = false;
@@ -248,11 +244,18 @@
       });
     }
 
-    function fillForm(x){ $('#id').value=x?.id||''; $('#name').value=x?.name||''; $('#address').value=x?.address||''; $('#phone').value=fmtPhone(x?.phone||''); $('#date').value=x?.date||''; $('#note').value=x?.note||''; }
+    function fillForm(x){ 
+      $('#id').value=x?.id||''; 
+      $('#name').value=x?.name||''; 
+      $('#address').value=x?.address||''; 
+      $('#phone').value=fmtPhone(x?.phone||''); 
+      $('#date').value=x?.date||''; 
+      $('#note').value=x?.note||''; 
+    }
 
-    // ---- Realtime listener ----
+    // ---- Realtime listener (FIX #1: ใส่ data ก่อน แล้วค่อยทับด้วย doc.id) ----
     onSnapshot(q, (snap) => {
-      SNAP = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      SNAP = snap.docs.map(d => ({ ...d.data(), id: d.id }));
       render();
     });
 
@@ -262,8 +265,8 @@
 
     $('#form').addEventListener('submit', async (e)=>{
       e.preventDefault();
+      // FIX #2: ไม่เก็บ field id ลงเอกสาร
       const row = {
-        id: $('#id').value || uid(),
         name: $('#name').value.trim(),
         address: $('#address').value.trim(),
         phone: fmtPhone($('#phone').value.trim()),
@@ -273,7 +276,7 @@
       };
       if(!row.name || cleanPhone(row.phone).length!==10){ alert('กรุณากรอกชื่อ และ เบอร์โทร 10 หลัก'); return; }
 
-      const existing = $('#id').value;
+      const existing = $('#id').value; // จะเป็น doc.id เสมอ
       if(existing){
         await setDoc(doc(customersRef, existing), row, { merge:true });
         toast('อัปเดตข้อมูลแล้ว');
@@ -290,14 +293,21 @@
       const id = b.dataset.id; const act = b.dataset.a; const row = SNAP.find(x=>x.id===id); if(!row) return;
 
       if(act==='edit'){
-        // โหลดจาก Firestore อีกรอบเพื่อความชัวร์
+        // FIX #3: fillForm โดยให้ doc.id เป็นตัวจริงเสมอ
         const snap = await getDoc(doc(customersRef, id));
-        const data = { id, ...snap.data() };
-        fillForm(data);
+        fillForm({ ...snap.data(), id });
         window.scrollTo({top:0, behavior:'smooth'});
       }
       if(act==='del'){
-        if(confirm('ลบรายการนี้?')){ await deleteDoc(doc(customersRef, id)); toast('ลบแล้ว'); }
+        if(confirm('ลบรายการนี้?')){
+          // FIX #4: try/catch เพื่อเห็น error ถ้ามี
+          try {
+            await deleteDoc(doc(customersRef, id));
+            toast('ลบแล้ว');
+          } catch(e){
+            alert('ลบไม่สำเร็จ: ' + e.message);
+          }
+        }
       }
       if(act==='copy'){
         try{
