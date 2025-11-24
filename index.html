@@ -11,20 +11,51 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      color:var(--text); background:radial-gradient(900px 500px at 15% -10%, rgba(249,168,212,.35), transparent 60%),
-      radial-gradient(800px 600px at 120% 10%, rgba(167,243,208,.35), transparent 60%), var(--bg); }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 15% -10%, rgba(249,168,212,.35), transparent 60%),
+        radial-gradient(800px 600px at 120% 10%, rgba(167,243,208,.35), transparent 60%),
+        var(--bg);
+    }
 
-    header{ position:sticky; top:0; z-index:10; border-bottom:1px solid var(--border); backdrop-filter: blur(10px);
-      background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.7)); }
+    header{
+      position:sticky;
+      top:0;
+      z-index:10;
+      border-bottom:1px solid var(--border);
+      backdrop-filter: blur(10px);
+      background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.7));
+    }
     .wrap{ max-width:1280px; margin:0 auto; padding:16px }
     .brand{ display:flex; align-items:center; gap:12px }
-    .logo{ font-weight:900; font-size:clamp(20px,2.4vw,28px); letter-spacing:.3px; line-height:1;
-      background:linear-gradient(90deg,var(--brand),var(--brand2)); -webkit-background-clip:text; background-clip:text; color:transparent }
+    .logo{
+      font-weight:900;
+      font-size:clamp(20px,2.4vw,28px);
+      letter-spacing:.3px;
+      line-height:1;
+      background:linear-gradient(90deg,var(--brand),var(--brand2));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
     .tagline{ color:var(--muted); font-size:13px }
 
-    .stats{ display:grid; grid-template-columns: repeat(2,1fr); gap:10px; margin-top:10px }
-    .stat{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:12px; box-shadow:var(--shadow) }
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(2,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    .stat{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      box-shadow:var(--shadow);
+    }
     .stat .k{ font-size:22px; font-weight:800 }
     .stat .t{ font-size:12px; color:var(--muted) }
 
@@ -36,27 +67,93 @@
     /* ===== Form ===== */
     .form{ position:sticky; top:132px; padding:18px }
     label{ display:block; font-size:13px; color:var(--muted); margin:10px 2px 6px }
-    input, textarea{ width:100%; background:#fff; border:1px solid var(--border); color:var(--text);
-      border-radius:10px; padding:10px 12px; outline:none; transition:border .2s, box-shadow .2s }
-    input:focus, textarea:focus{ border-color:#f0abfc; box-shadow:0 0 0 3px rgba(240,171,252,.25) }
+    input, textarea{
+      width:100%;
+      background:#fff;
+      border:1px solid var(--border);
+      color:var(--text);
+      border-radius:10px;
+      padding:10px 12px;
+      outline:none;
+      transition:border .2s, box-shadow .2s;
+    }
+    input:focus, textarea:focus{
+      border-color:#f0abfc;
+      box-shadow:0 0 0 3px rgba(240,171,252,.25);
+    }
     textarea{ min-height:84px; resize:vertical }
 
     .row-2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px }
     @media (max-width:680px){ .row-2{ grid-template-columns:1fr } }
 
     .actions{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap }
-    .btn{ border:1px solid var(--border); background:linear-gradient(180deg,#fff,#fbfbff); color:#1f2937; padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:700 }
-    .btn.primary{ border-color:transparent; background:linear-gradient(90deg,var(--brand),var(--brand2)); color:#0b1020 }
-    .btn.danger{ border-color:transparent; background:linear-gradient(90deg,#fca5a5,#f87171); color:#fff }
+    .btn{
+      border:1px solid var(--border);
+      background:linear-gradient(180deg,#fff,#fbfbff);
+      color:#1f2937;
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+    }
+    .btn.primary{
+      border-color:transparent;
+      background:linear-gradient(90deg,var(--brand),var(--brand2));
+      color:#0b1020;
+    }
+    .btn.danger{
+      border-color:transparent;
+      background:linear-gradient(90deg,#fca5a5,#f87171);
+      color:#fff;
+    }
     .btn.warn{ background:linear-gradient(90deg,#fde68a,#fca5a5) }
 
     /* ===== Table ===== */
-    .tools{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px; flex-wrap:wrap }
-    .chip{ font-size:12px; color:#374151; background:var(--chip); border:1px solid var(--border); padding:6px 10px; border-radius:999px }
-    .table-wrap{ padding:0 12px 12px; max-height: calc(100svh - 260px); overflow:auto }
-    table{ width:100%; border-collapse:separate; border-spacing:0; min-width:900px }
-    thead th{ position:sticky; top:0; background:#fff; z-index:4; border-bottom:2px solid var(--border); padding:13px 12px; font-weight:800; font-size:14px; user-select:none; cursor:pointer }
-    tbody td{ padding:12px 12px; border-bottom:1px solid #f1f5f9; vertical-align:top; font-size:15px }
+    .tools{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 16px;
+      flex-wrap:wrap;
+    }
+    .chip{
+      font-size:12px;
+      color:#374151;
+      background:var(--chip);
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+    }
+    .table-wrap{
+      padding:0 12px 12px;
+      max-height: calc(100svh - 260px);
+      overflow:auto;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width:900px;
+    }
+    thead th{
+      position:sticky;
+      top:0;
+      background:#fff;
+      z-index:4;
+      border-bottom:2px solid var(--border);
+      padding:13px 12px;
+      font-weight:800;
+      font-size:14px;
+      user-select:none;
+      cursor:pointer;
+    }
+    tbody td{
+      padding:12px 12px;
+      border-bottom:1px solid #f1f5f9;
+      vertical-align:top;
+      font-size:15px;
+    }
     tbody tr:hover{ background:rgba(249,168,212,.15) }
     th:nth-child(1){ width:64px }
     th:nth-child(2){ width:240px }
@@ -66,11 +163,29 @@
     th:nth-child(6){ width:260px }
     .nowrap{ white-space:nowrap }
     .muted{ color:var(--muted) }
-    .idcell{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; color:#7c3aed }
+    .idcell{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:12px;
+      color:#7c3aed;
+    }
 
-    #toast{ position:fixed; right:16px; bottom:16px; display:none; background:#111827; color:#fff; padding:12px 14px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,.2) }
+    #toast{
+      position:fixed;
+      right:16px;
+      bottom:16px;
+      display:none;
+      background:#111827;
+      color:#fff;
+      padding:12px 14px;
+      border-radius:12px;
+      box-shadow:0 8px 30px rgba(0,0,0,.2);
+    }
 
-    @media print{ header,.tools,.actions,#toast{ display:none !important } .table-wrap{ max-height:none; overflow:visible } body{ background:white } }
+    @media print{
+      header,.tools,.actions,#toast{ display:none !important }
+      .table-wrap{ max-height:none; overflow:visible }
+      body{ background:white }
+    }
   </style>
 </head>
 <body>
@@ -82,7 +197,10 @@
       </div>
       <div class="tagline">เก็บชื่อ–ที่อยู่–เบอร์โทร–วันที่ ค้นหา/เรียง/แก้ไข/ลบ/พิมพ์ (แชร์ข้อมูลร่วมกัน)</div>
       <div class="stats">
-        <div class="stat"><div class="k" id="statTotal">0</div><div class="t">ลูกค้าทั้งหมด</div></div>
+        <div class="stat">
+          <div class="k" id="statTotal">0</div>
+          <div class="t">ลูกค้าทั้งหมด</div>
+        </div>
       </div>
     </div>
   </header>
@@ -162,7 +280,7 @@
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
-    // ---- Your Firebase config ----
+    // ---- Firebase config ----
     const firebaseConfig = {
       apiKey: "AIzaSyB90Xv0vw6rvVChpycbl5iPPf987ZBbQmM",
       authDomain: "manimontra-bangle.firebaseapp.com",
@@ -180,103 +298,129 @@
     try { await signInAnonymously(getAuth()); } catch(e){ console.log('Anonymous auth skipped', e?.message); }
 
     // ---- Helpers / UI ----
-    const $ = s => document.querySelector(s);
+    const $  = s => document.querySelector(s);
     const $$ = s => Array.from(document.querySelectorAll(s));
     const cleanPhone = p => (p||'').replace(/[^0-9]/g,'');
-    const fmtPhone = p => { const d = cleanPhone(p); return d.length===10 ? `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}` : p||'' };
+    const fmtPhone = p => {
+      const d = cleanPhone(p);
+      return d.length===10 ? `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}` : p||'';
+    };
     const todayISO = () => new Date().toISOString().slice(0,10);
-    const fmtDate = d => !d?'' : new Date(d).toLocaleDateString('th-TH');
-    const toast = (msg)=>{ const el=$('#toast'); el.textContent=msg; el.style.display='block'; clearTimeout(toast.t); toast.t=setTimeout(()=>el.style.display='none',2000); };
+    const fmtDate  = d => !d ? '' : new Date(d).toLocaleDateString('th-TH');
+    const toast = (msg)=>{
+      const el = $('#toast');
+      el.textContent = msg;
+      el.style.display = 'block';
+      clearTimeout(toast.t);
+      toast.t = setTimeout(()=> el.style.display='none', 2000);
+    };
 
     let sortBy = 'date';
     let sortAsc = false;
-    let SNAP = [];      // snapshot cache (array of {id, ...data})
+    let SNAP   = [];  // snapshot cache (array of {id, ...data})
 
     const customersRef = collection(db, 'customers');
-    const q = query(customersRef, orderBy('createdAt','desc'));
+    const qSnap        = query(customersRef, orderBy('createdAt','desc'));
 
+    // ✅ แก้แล้ว: ใช้แค่ statTotal ตัวเดียว
     function refreshStats(){
       $('#statTotal').textContent = SNAP.length;
-      const t = new Date().toLocaleDateString('th-TH');
-      const c = SNAP.filter(r => r.date && new Date(r.date).toLocaleDateString('th-TH') === t).length;
-      $('#statToday').textContent = c;
     }
 
     function render(){
       refreshStats();
+
       const qtext = $('#search').value.trim().toLowerCase();
-      const rows = SNAP.filter(r=>{
-        const blob = `${r.name} ${r.phone} ${r.address} ${r.note}`.toLowerCase();
-        return blob.includes(qtext);
-      }).sort((a,b)=>{
-        const A = (a[sortBy]||'').toString().toLowerCase();
-        const B = (b[sortBy]||'').toString().toLowerCase();
-        if(A<B) return sortAsc?-1:1; if(A>B) return sortAsc?1:-1; return 0;
-      });
+      const rows = SNAP
+        .filter(r=>{
+          const blob = `${r.name} ${r.phone} ${r.address} ${r.note}`.toLowerCase();
+          return blob.includes(qtext);
+        })
+        .sort((a,b)=>{
+          const A = (a[sortBy]||'').toString().toLowerCase();
+          const B = (b[sortBy]||'').toString().toLowerCase();
+          if(A<B) return sortAsc ? -1 : 1;
+          if(A>B) return sortAsc ?  1 : -1;
+          return 0;
+        });
 
       $('#countChip').textContent = `${rows.length} รายการ`;
-      ['name','phone','date'].forEach(k=>{ const el=$(`#s-${k}`); if(!el) return; el.textContent = sortBy===k ? (sortAsc?'▲':'▼') : '' });
+      ['name','phone','date'].forEach(k=>{
+        const el = $(`#s-${k}`);
+        if(!el) return;
+        el.textContent = sortBy===k ? (sortAsc ? '▲' : '▼') : '';
+      });
 
-      const tb = $('#tbody'); tb.innerHTML='';
+      const tb = $('#tbody');
+      tb.innerHTML = '';
+
       if(rows.length===0){
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td colspan="6" class="muted" style="text-align:center; padding:30px">ยังไม่มีข้อมูล</td>`;
-        tb.appendChild(tr); return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="6" class="muted" style="text-align:center; padding:30px">ยังไม่มีข้อมูล</td>`;
+        tb.appendChild(tr);
+        return;
       }
 
       rows.forEach((r,i)=>{
         const tel = cleanPhone(r.phone);
-        const tr = document.createElement('tr');
+        const tr  = document.createElement('tr');
         tr.innerHTML = `
-        <td class="nowrap"><span class="idcell">${String(i+1).padStart(2,'0')}</span></td>
-        <td>${r.name||'<span class=muted>-</span>'}</td>
-        <td>${tel?`<a href="tel:${tel}">${fmtPhone(r.phone)}</a>`:(r.phone||'<span class=muted>-</span>')}</td>
-        <td>${(r.address||'').replaceAll('\n','<br>') || '<span class=muted>-</span>'}</td>
-        <td class="nowrap">${fmtDate(r.date)||'<span class=muted>-</span>'}</td>
-        <td>${r.note||'<span class=muted>-</span>'}
-          <div class="nowrap" style="margin-top:6px">
-            <button class="btn" data-a="copy" data-id="${r.id}">คัดลอกที่อยู่</button>
-            <button class="btn" data-a="edit" data-id="${r.id}">แก้ไข</button>
-            <button class="btn danger" data-a="del" data-id="${r.id}">ลบ</button>
-          </div>
-        </td>`;
+          <td class="nowrap"><span class="idcell">${String(i+1).padStart(2,'0')}</span></td>
+          <td>${r.name || '<span class="muted">-</span>'}</td>
+          <td>${tel ? `<a href="tel:${tel}">${fmtPhone(r.phone)}</a>` : (r.phone || '<span class="muted">-</span>')}</td>
+          <td>${(r.address||'').replaceAll('\n','<br>') || '<span class="muted">-</span>'}</td>
+          <td class="nowrap">${fmtDate(r.date) || '<span class="muted">-</span>'}</td>
+          <td>
+            ${r.note || '<span class="muted">-</span>'}
+            <div class="nowrap" style="margin-top:6px">
+              <button class="btn" data-a="copy" data-id="${r.id}">คัดลอกที่อยู่</button>
+              <button class="btn" data-a="edit" data-id="${r.id}">แก้ไข</button>
+              <button class="btn danger" data-a="del" data-id="${r.id}">ลบ</button>
+            </div>
+          </td>`;
         tb.appendChild(tr);
       });
     }
 
-    function fillForm(x){ 
-      $('#id').value=x?.id||''; 
-      $('#name').value=x?.name||''; 
-      $('#address').value=x?.address||''; 
-      $('#phone').value=fmtPhone(x?.phone||''); 
-      $('#date').value=x?.date||''; 
-      $('#note').value=x?.note||''; 
+    function fillForm(x){
+      $('#id').value      = x?.id      || '';
+      $('#name').value    = x?.name    || '';
+      $('#address').value = x?.address || '';
+      $('#phone').value   = fmtPhone(x?.phone || '');
+      $('#date').value    = x?.date    || '';
+      $('#note').value    = x?.note    || '';
     }
 
-    // ---- Realtime listener (FIX #1: ใส่ data ก่อน แล้วค่อยทับด้วย doc.id) ----
-    onSnapshot(q, (snap) => {
+    // ---- Realtime listener ----
+    onSnapshot(qSnap, (snap) => {
       SNAP = snap.docs.map(d => ({ ...d.data(), id: d.id }));
       render();
     });
 
     // ---- Form events ----
-    $('#phone').addEventListener('input', (e)=>{ e.target.value = fmtPhone(e.target.value); });
+    $('#phone').addEventListener('input', (e)=>{
+      e.target.value = fmtPhone(e.target.value);
+    });
     $('#resetBtn').onclick = ()=> fillForm({});
 
     $('#form').addEventListener('submit', async (e)=>{
       e.preventDefault();
-      // FIX #2: ไม่เก็บ field id ลงเอกสาร
+
       const row = {
-        name: $('#name').value.trim(),
+        name:    $('#name').value.trim(),
         address: $('#address').value.trim(),
-        phone: fmtPhone($('#phone').value.trim()),
-        date: $('#date').value || todayISO(),
-        note: $('#note').value.trim(),
+        phone:   fmtPhone($('#phone').value.trim()),
+        date:    $('#date').value || todayISO(),
+        note:    $('#note').value.trim(),
         updatedAt: serverTimestamp(),
       };
-      if(!row.name || cleanPhone(row.phone).length!==10){ alert('กรุณากรอกชื่อ และ เบอร์โทร 10 หลัก'); return; }
 
-      const existing = $('#id').value; // จะเป็น doc.id เสมอ
+      if(!row.name || cleanPhone(row.phone).length!==10){
+        alert('กรุณากรอกชื่อ และ เบอร์โทร 10 หลัก');
+        return;
+      }
+
+      const existing = $('#id').value; // doc.id
       if(existing){
         await setDoc(doc(customersRef, existing), row, { merge:true });
         toast('อัปเดตข้อมูลแล้ว');
@@ -284,52 +428,71 @@
         await addDoc(customersRef, { ...row, createdAt: serverTimestamp() });
         toast('เพิ่มลูกค้าแล้ว');
       }
+
       fillForm({});
     });
 
     // ---- Table actions ----
     $('#tbody').addEventListener('click', async (e)=>{
-      const b = e.target.closest('button'); if(!b) return;
-      const id = b.dataset.id; const act = b.dataset.a; const row = SNAP.find(x=>x.id===id); if(!row) return;
+      const b = e.target.closest('button');
+      if(!b) return;
+
+      const id  = b.dataset.id;
+      const act = b.dataset.a;
+      const row = SNAP.find(x=>x.id===id);
+      if(!row) return;
 
       if(act==='edit'){
-        // FIX #3: fillForm โดยให้ doc.id เป็นตัวจริงเสมอ
         const snap = await getDoc(doc(customersRef, id));
         fillForm({ ...snap.data(), id });
-        window.scrollTo({top:0, behavior:'smooth'});
+        window.scrollTo({ top:0, behavior:'smooth' });
       }
+
       if(act==='del'){
         if(confirm('ลบรายการนี้?')){
-          // FIX #4: try/catch เพื่อเห็น error ถ้ามี
-          try {
+          try{
             await deleteDoc(doc(customersRef, id));
             toast('ลบแล้ว');
-          } catch(e){
-            alert('ลบไม่สำเร็จ: ' + e.message);
+          }catch(err){
+            alert('ลบไม่สำเร็จ: ' + err.message);
           }
         }
       }
+
       if(act==='copy'){
         try{
-          await navigator.clipboard.writeText(`${row.name}\n${row.address}\nโทร: ${fmtPhone(row.phone)}`);
+          await navigator.clipboard.writeText(
+            `${row.name}\n${row.address}\nโทร: ${fmtPhone(row.phone)}`
+          );
           toast('คัดลอกที่อยู่แล้ว');
-        }catch{ toast('คัดลอกไม่สำเร็จ'); }
+        }catch{
+          toast('คัดลอกไม่สำเร็จ');
+        }
       }
     });
 
     // ---- Sorting / Search / Print / Clear all ----
     $$('#table thead th[data-sort]').forEach(th=>{
       th.addEventListener('click',()=>{
-        const k = th.dataset.sort; if(k==='#') return;
-        if(sortBy===k) sortAsc=!sortAsc; else { sortBy=k; sortAsc=true; }
+        const k = th.dataset.sort;
+        if(k==='#') return;
+        if(sortBy===k) sortAsc = !sortAsc;
+        else { sortBy = k; sortAsc = true; }
         render();
       });
     });
 
-    $('#search').addEventListener('input', (()=>{ let t; return (e)=>{ clearTimeout(t); t=setTimeout(render,250); }; })());
+    $('#search').addEventListener('input', (()=>{
+      let t;
+      return ()=>{
+        clearTimeout(t);
+        t = setTimeout(render, 250);
+      };
+    })());
+
     $('#printBtn').onclick = () => window.print();
 
-    $('#clearBtn').onclick = async () => {
+    $('#clearBtn').onclick = async ()=>{
       if(!confirm('ล้างฐานข้อมูลทั้งหมด?')) return;
       const snap = await getDocs(customersRef);
       const deletions = snap.docs.map(d => deleteDoc(d.ref));
